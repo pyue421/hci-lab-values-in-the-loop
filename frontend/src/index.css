@@ -1,0 +1,213 @@
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --border:#e8ebf3;
+  --primary:#6e6ef8;
+  --primary2:#9ee6ff;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  background: var(--bg);
+  color:#111;
+}
+
+.onb-page{
+  min-height: 100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 24px;
+}
+
+.onb-card{
+  width: 920px;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 28px 32px 22px;
+  box-shadow: 0 14px 34px rgba(16,24,40,0.10);
+}
+
+.onb-progress{
+  height: 10px;
+  background: #edf0ff;
+  border-radius: 999px;
+  overflow:hidden;
+}
+
+.onb-progress-bar{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary), var(--primary2));
+}
+
+.onb-header{
+  text-align:center;
+  margin-top: 18px;
+}
+
+.onb-title{
+  font-size: 34px;
+  font-weight: 700;
+  white-space: pre-line; /* lets the car question line-break */
+}
+
+.onb-subtitle{
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.onb-body{
+  margin-top: 24px;
+  display:flex;
+  justify-content:center;
+}
+
+.onb-section{
+  width: 640px;
+}
+
+.field{
+  margin-top: 18px;
+}
+
+.field-label{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.field-icon{
+  width: 22px;
+  display:inline-flex;
+  justify-content:center;
+}
+
+.input{
+  margin-top: 10px;
+  width: 100%;
+  height: 54px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0 18px;
+  outline: none;
+  font-size: 16px;
+  background: #fff;
+}
+
+.input:focus{
+  border-color: rgba(110,110,248,0.6);
+  box-shadow: 0 0 0 4px rgba(110,110,248,0.12);
+}
+
+.input-error{
+  border-color: rgba(244,63,94,0.5);
+}
+
+.field-error{
+  margin-top: 8px;
+  color: #e11d48;
+  font-size: 13px;
+}
+
+.onb-footer{
+  margin-top: 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.onb-footer-right{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.auth-actions{
+  display:flex;
+  gap: 12px;
+}
+
+.btn{
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor:pointer;
+  font-size: 16px;
+}
+
+.btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.btn-ghost{
+  background: #f3f4f6;
+}
+
+.btn-primary{
+  border: none;
+  background: linear-gradient(90deg, var(--primary), var(--primary2));
+  color: #fff;
+  border-radius: 14px;
+}
+
+.onb-reset{
+  margin-top: 12px;
+  text-align:center;
+}
+
+.link{
+  background:none;
+  border:none;
+  color: var(--muted);
+  cursor:pointer;
+  text-decoration: underline;
+  font-size: 13px;
+}
+
+/* Car access choice cards */
+.choice-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.choice-card{
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px 18px;
+  min-height: 140px;
+  background: #fafafa;
+  cursor:pointer;
+  text-align:center;
+  box-shadow: 0 8px 18px rgba(16,24,40,0.04);
+}
+
+.choice-card:hover{
+  transform: translateY(-2px);
+}
+
+.choice-selected{
+  border: 2px solid rgba(110,110,248,0.85);
+  background: #eef2ff;
+}
+
+.choice-icon{
+  font-size: 32px;
+}
+
+.choice-title{
+  margin-top: 14px;
+  font-size: 18px;
+  font-weight: 600;
+}
