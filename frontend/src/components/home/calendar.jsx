@@ -43,11 +43,11 @@ export default function CalendarPanel() {
       <header className="calendar-topbar">
         <div className="calendar-week-nav">
           <button type="button" className="calendar-arrow" onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week">
-            &lt;
+            ←
           </button>
           <div className="calendar-week-label">{formatWeekRange(weekStart)}</div>
           <button type="button" className="calendar-arrow" onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week">
-            &gt;
+            →
           </button>
         </div>
 

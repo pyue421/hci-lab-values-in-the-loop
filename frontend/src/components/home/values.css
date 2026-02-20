@@ -1,3 +1,11 @@
+.home-values-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 0;
+  overflow: hidden;
+}
+
 .values-header {
   margin-bottom: 0;
 }
@@ -14,6 +22,8 @@
 .value-bubble-wrap {
   position: relative;
   height: 255px;
+  flex: 1;
+  min-height: 190px;
 }
 
 .value-bubble {
@@ -39,38 +49,38 @@
 }
 
 .value-bubble strong {
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1;
 }
 
 .value-bubble-green {
-  background: rgba(140, 233, 184, 0.34);
-  border-color: #4dbb7c;
-  color: #1a7045;
+  background: #B6F3D4;
+  border-color: #49E194;
+  color: #3A3A3A;
 }
 
 .value-bubble-rose {
   background: rgba(253, 176, 167, 0.35);
-  border-color: #e08176;
-  color: #7f3c36;
+  border-color: #EB807B;
+  color: #3A3A3A;
 }
 
 .value-bubble-amber {
   background: rgba(251, 223, 130, 0.35);
-  border-color: #d4ad37;
-  color: #7a5d13;
+  border-color: #FFD351;
+  color: #3A3A3A;
 }
 
 .value-bubble-cyan {
-  background: rgba(151, 222, 255, 0.38);
-  border-color: #42a8d8;
-  color: #1d5f7e;
+  background: #C4F0FF;
+  border-color: #48CBF4;
+  color: #3A3A3A;
 }
 
 .value-bubble-violet {
   background: rgba(203, 167, 246, 0.36);
-  border-color: #a570dc;
-  color: #5d3a87;
+  border-color: #C281EB;
+  color: #3A3A3A;
 }
 
 @media (max-width: 1180px) {
@@ -85,6 +95,6 @@
   }
 
   .value-bubble strong {
-    font-size: 20px;
+    font-size: 17px;
   }
 }
