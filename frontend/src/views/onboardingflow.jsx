@@ -102,8 +102,8 @@ export default function OnboardingFlow() {
     saveProgress({ step: nextStep })
 
     if (state.step === stepCount - 1) {
-      // finished — go home (or whatever route you want)
-      navigate("/home")
+      // mandatory info complete -> go to preference cards (part 2)
+      navigate("/onboarding/preferences")
     }
   }
 
