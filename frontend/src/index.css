@@ -237,6 +237,12 @@ body{
   color:#3A3A3A;
 }
 
+.pref-title-regenerating{
+  font-size: 24px;
+  font-weight: 400;
+  color: #929292;
+}
+
 .pref-choice-grid{
   margin-top: 50px;
   display:grid;
@@ -323,6 +329,12 @@ body{
 
 .pref-none input:checked::before{
   transform: scale(1);
+}
+
+.pref-note{
+  margin-top: 10px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 .pref-footer{
