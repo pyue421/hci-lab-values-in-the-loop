@@ -2,7 +2,7 @@
   --home-bg-1: #f2f8ff;
   --home-bg-2: #fdf6ef;
   --home-card: rgba(255, 255, 255, 0.86);
-  --home-border: #dce6f3;
+  --home-border: #e5e7eb;
   --home-text-soft: #607083;
   min-height: 100vh;
   padding: 24px;
@@ -18,7 +18,7 @@
   margin: 0 auto;
   height: 860px;
   display: flex;
-  gap: 2px;
+  gap: 1px;
 }
 
 .home-card {
@@ -45,6 +45,12 @@
   font-size: 16px;
   line-height: 1.05;
   font-weight: 500;
+}
+
+.home-map-card .section-header h2,
+.map-panel-inner .section-header h2,
+.home-values-card .section-header h2 {
+  font-weight: 400;
 }
 
 .section-header p {
@@ -78,7 +84,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .home-right-top,
@@ -108,20 +114,20 @@
 }
 
 .home-splitter-vertical {
-  width: 14px;
+  width: 8px;
   cursor: col-resize;
 }
 
 .home-splitter-vertical::before {
   width: 6px;
   height: 84px;
-  left: 4px;
+  left: 50%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .home-splitter-horizontal {
-  height: 14px;
+  height: 8px;
   cursor: row-resize;
 }
 
@@ -129,8 +135,8 @@
   width: 84px;
   height: 6px;
   left: 50%;
-  top: 4px;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .home-splitter:hover::before,
@@ -196,6 +202,6 @@
 
   .section-header h2 {
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 400;
   }
 }

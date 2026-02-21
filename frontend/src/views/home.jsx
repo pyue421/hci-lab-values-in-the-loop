@@ -54,19 +54,11 @@ export default function Home() {
     }
   }, [dragType])
 
-  useEffect(() => {
-    function onDocumentPointerDown(event) {
-      if (!activeMatchId) return
-      if (!matchesAreaRef.current) return
-      if (matchesAreaRef.current.contains(event.target)) return
-      setActiveMatchId(null)
-    }
-
-    document.addEventListener("pointerdown", onDocumentPointerDown)
-    return () => {
-      document.removeEventListener("pointerdown", onDocumentPointerDown)
-    }
-  }, [activeMatchId])
+  function onMatchesPanelPointerDown(event) {
+    if (!activeMatchId) return
+    if (event.target.closest(".match-card")) return
+    setActiveMatchId(null)
+  }
 
   return (
     <div className="home-page">
@@ -76,7 +68,7 @@ export default function Home() {
             <MapPanel activeMatch={selectedMatch} embedded />
           </div>
           <div className="home-left-divider" />
-          <div className="home-left-matches" ref={matchesAreaRef}>
+          <div className="home-left-matches" ref={matchesAreaRef} onPointerDown={onMatchesPanelPointerDown}>
             <MatchCardsPanel
               matches={matches}
               activeMatchId={activeMatchId}
@@ -95,7 +87,7 @@ export default function Home() {
 
         <div className="home-right-column" style={{ width: `${100 - leftWidthPct}%` }} ref={rightColumnRef}>
           <div className="home-right-top" style={{ height: `${rightTopPct}%` }}>
-            <CalendarPanel />
+            <CalendarPanel activeMatch={selectedMatch} onBackToCalendar={() => setActiveMatchId(null)} />
           </div>
 
           <button

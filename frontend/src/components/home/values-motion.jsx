@@ -49,7 +49,7 @@ export function MotionMergedBubble({ className, style, gradientId, toneStyles, l
           d={path}
           fill={`url(#${gradientId}-fill)`}
           stroke={`url(#${gradientId}-stroke)`}
-          strokeWidth="2.5"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ opacity: mergedOpacity }}
@@ -60,7 +60,7 @@ export function MotionMergedBubble({ className, style, gradientId, toneStyles, l
           r="56"
           fill={toneStyles.fillLeft}
           stroke={toneStyles.strokeLeft}
-          strokeWidth="2.5"
+          strokeWidth="1.8"
           style={{ opacity: separateOpacity }}
         />
         <motion.circle
@@ -69,7 +69,7 @@ export function MotionMergedBubble({ className, style, gradientId, toneStyles, l
           r="56"
           fill={toneStyles.fillRight}
           stroke={toneStyles.strokeRight}
-          strokeWidth="2.5"
+          strokeWidth="1.8"
           style={{ opacity: separateOpacity }}
         />
       </svg>
@@ -121,15 +121,12 @@ function getMergeGeometry(matchPercent, mergeProgress) {
   const leftCx = center - leftOffset
   const rightCx = center + leftOffset
 
-  const baseTopNeck = cy - r + 6
-  const baseBottomNeck = cy + r - 6
   const settle = smoothstep(mergeProgress)
-  const contact = contactPulse(mergeProgress)
-  const topNeck = lerp(cy - r + 2, baseTopNeck, settle) + contact * 5
-  const bottomNeck = lerp(cy + r - 2, baseBottomNeck, settle) - contact * 5
+  const topNeck = cy - r
+  const bottomNeck = cy + r
 
   const edgePull = lerp(42, 52, settle)
-  const neckPull = lerp(6, 10, settle) - contact * 2
+  const neckPull = lerp(3, 6, settle)
 
   return {
     cx1: leftCx,

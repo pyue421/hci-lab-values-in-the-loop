@@ -42,10 +42,21 @@ function MatchCard({ match, active, onClick }) {
           <div className="distance-icon" aria-hidden>
             <svg viewBox="0 0 32 32" className="distance-pin-icon">
               <path
-                d="M16 29.2c-0.7 0-1.4-0.3-1.9-0.8L6.5 20.8C4.2 18.5 3 15.6 3 12.5C3 5.6 8.6 0 15.5 0C22.4 0 28 5.6 28 12.5c0 3.1-1.2 6-3.5 8.3l-6.6 7.6c-0.5 0.5-1.2 0.8-1.9 0.8zM15.5 3.2c-5.1 0-9.3 4.2-9.3 9.3 0 2.3 0.9 4.5 2.6 6.2l6.7 7.5 6.6-7.5c1.7-1.7 2.6-3.9 2.6-6.2 0-5.1-4.2-9.3-9.2-9.3z"
-                fill="currentColor"
+                d="M12 14a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-              <circle cx="15.5" cy="12.4" r="3.8" fill="currentColor" />
+              <path
+                d="M23.543 21.543l-5.657 5.657a2.667 2.667 0 0 1 -3.771 0l-5.658 -5.657a10.667 10.667 0 1 1 15.086 0z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
           <div>
@@ -58,12 +69,16 @@ function MatchCard({ match, active, onClick }) {
       <div className="match-body-grid">
         <div className="match-left-col">
           <div className="ai-summary-box">
-            <span className="summary-icon">✶</span>
+            <span className="summary-icon" aria-hidden>
+              <svg viewBox="0 0 24 24" className="summary-icon-gemini">
+                <path d="M12 1.8c1.2 4.8 3.2 6.8 8 8.1-4.8 1.3-6.8 3.3-8 8.1-1.2-4.8-3.2-6.8-8-8.1 4.8-1.3 6.8-3.3 8-8.1z" />
+              </svg>
+            </span>
             <p>{match.aiSummary}</p>
           </div>
 
           <div className="signal-wrap">
-            <RadarMap profileA={match.signalProfileA} profileB={match.signalProfileB} />
+            <RadarMap profileA={match.signalProfileA} profileB={match.signalProfileB} valueMatchScores={match.valueMatchScores} />
           </div>
         </div>
 
@@ -71,7 +86,7 @@ function MatchCard({ match, active, onClick }) {
           <div className="meta-stack">
             <div className="meta-row">
               <span className="meta-row-label">Availability:</span>
-              <strong className="status-chip">● {match.role}</strong>
+              <strong className="status-chip"><span className="status-dot" aria-hidden>●</span>{match.role}</strong>
             </div>
             <div className="meta-row">
               <span className="meta-row-label">Buffer Time:</span>
@@ -99,12 +114,15 @@ function MatchCard({ match, active, onClick }) {
   )
 }
 
-function RadarMap({ profileA, profileB }) {
+function RadarMap({ profileA, profileB, valueMatchScores }) {
+  const VALUE_AXES = ["Environmental Impact", "Punctuality", "Trustworthiness", "Efficiency", "Kindness"]
   const size = 240
   const center = 120
-  const radius = 92
+  const radius = 114
   const steps = 6
-  const axisCount = profileA.length
+  const axisCount = VALUE_AXES.length
+  const normalizedA = normalizeProfile(profileA, axisCount)
+  const normalizedB = normalizeProfile(profileB, axisCount)
 
   function pointsFor(values) {
     return values
@@ -116,18 +134,30 @@ function RadarMap({ profileA, profileB }) {
       .join(" ")
   }
 
-  function ringPoints(step) {
-    const r = (step / steps) * radius
-    return Array.from({ length: axisCount }, (_, idx) => {
-      const angle = ((Math.PI * 2) / axisCount) * idx - Math.PI / 2
-      return `${center + Math.cos(angle) * r},${center + Math.sin(angle) * r}`
-    }).join(" ")
+  function axisPoint(idx, value = 100) {
+    const angle = ((Math.PI * 2) / axisCount) * idx - Math.PI / 2
+    const r = (value / 100) * radius
+    return {
+      x: center + Math.cos(angle) * r,
+      y: center + Math.sin(angle) * r,
+    }
+  }
+
+  function matchScoreFor(label) {
+    const score = Number(valueMatchScores?.[label])
+    return Number.isFinite(score) ? score : 20
   }
 
   return (
     <svg className="radar-map" viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Values alignment map">
       {Array.from({ length: steps }, (_, i) => (
-        <polygon key={i} points={ringPoints(i + 1)} className="radar-ring" />
+        <circle
+          key={i}
+          cx={center}
+          cy={center}
+          r={((i + 1) / steps) * radius}
+          className="radar-ring-circle"
+        />
       ))}
 
       {Array.from({ length: axisCount }, (_, idx) => {
@@ -144,8 +174,26 @@ function RadarMap({ profileA, profileB }) {
         )
       })}
 
-      <polygon points={pointsFor(profileB)} className="radar-shape radar-shape-b" />
-      <polygon points={pointsFor(profileA)} className="radar-shape radar-shape-a" />
+      <polygon points={pointsFor(normalizedB)} className="radar-shape radar-shape-b" />
+      <polygon points={pointsFor(normalizedA)} className="radar-shape radar-shape-a" />
+
+      {VALUE_AXES.map((label, idx) => {
+        const point = axisPoint(idx, normalizedB[idx])
+        const score = matchScoreFor(label)
+        return (
+          <circle key={label} cx={point.x} cy={point.y} r="7" className="radar-corner-hit">
+            <title>{`${label}: ${score}% match`}</title>
+          </circle>
+        )
+      })}
     </svg>
   )
+}
+
+function normalizeProfile(values, length) {
+  return Array.from({ length }, (_, idx) => {
+    const v = Number(values?.[idx])
+    if (!Number.isFinite(v)) return 0
+    return Math.max(0, Math.min(100, v))
+  })
 }

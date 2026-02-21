@@ -1,4 +1,4 @@
-import React, { useId } from "react"
+import React, { useId, useMemo, useState } from "react"
 import { MotionMergedBubble } from "./values-motion"
 import "./values.css"
 
@@ -11,26 +11,57 @@ const bubblePositions = [
 ]
 
 export default function ValuesPanel({ valueWeights, activeMatch }) {
+  const [viewMode, setViewMode] = useState("bubble")
   const matchScoreByLabel = buildMatchScoreMap(activeMatch)
+  const valuesByPriority = useMemo(
+    () => [...valueWeights].sort((a, b) => b.weight - a.weight || a.label.localeCompare(b.label)),
+    [valueWeights]
+  )
 
   return (
     <section className="home-card home-values-card">
       <header className="section-header values-header">
         <h2>Values In Your Solution</h2>
-        <span className="values-view-chip">Bubble View</span>
+        <select
+          className="values-view-select"
+          value={viewMode}
+          onChange={(event) => setViewMode(event.target.value)}
+          aria-label="Choose values view"
+        >
+          <option value="bubble">Bubble View</option>
+          <option value="list">List View</option>
+        </select>
       </header>
 
-      <div className="value-bubble-wrap">
-        {valueWeights.map((value, idx) => (
-          <ValueBubble
-            key={value.label}
-            value={value}
-            index={idx}
-            matchedScore={matchScoreByLabel.get(value.label)}
-            hasSelection={Boolean(activeMatch)}
-          />
-        ))}
-      </div>
+      {viewMode === "bubble" ? (
+        <div className="value-bubble-wrap">
+          {valueWeights.map((value, idx) => (
+            <ValueBubble
+              key={value.label}
+              value={value}
+              index={idx}
+              matchedScore={matchScoreByLabel.get(value.label)}
+              hasSelection={Boolean(activeMatch)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="values-list-wrap">
+          {valuesByPriority.map((value, idx) => {
+            const score = Number.isFinite(matchScoreByLabel.get(value.label)) ? matchScoreByLabel.get(value.label) : 0
+            return (
+              <article key={value.label} className={`values-list-item values-list-item-${value.tone}`}>
+                <span className="values-list-rank">{idx + 1}</span>
+                <div className="values-list-main">
+                  <strong>{value.label}</strong>
+                  <span>{`${value.weight}%`}</span>
+                </div>
+                <div className="values-list-score">{`${score}% match`}</div>
+              </article>
+            )
+          })}
+        </div>
+      )}
     </section>
   )
 }
@@ -69,7 +100,7 @@ function ValueBubble({ value, index, matchedScore, hasSelection }) {
   const style = {
     left: bubblePositions[index].left,
     top: bubblePositions[index].top,
-    width: `${isMatched ? 226 : 80 + value.weight * 2.1}px`,
+    width: `${isMatched ? 208 : 80 + value.weight * 2.1}px`,
     height: `${isMatched ? 132 : 80 + value.weight * 2.1}px`,
   }
 
@@ -99,8 +130,8 @@ function ValueBubble({ value, index, matchedScore, hasSelection }) {
 /* ----------------------------- */
 
 function getMergedToneStyles(tone) {
-  const leftFill = "#ffe1cc"
-  const leftStroke = "#FAA26A"
+  const leftFill = "#fee9da"
+  const leftStroke = "#ffc39d"
 
   switch (tone) {
     case "green":

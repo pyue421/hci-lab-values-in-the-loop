@@ -10,7 +10,7 @@
   flex: 1;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #d2e0f0;
+  border: 1px solid #e5e7eb;
   position: relative;
 }
 
@@ -33,7 +33,7 @@
 
 .map-fallback-link {
   border-radius: 999px;
-  border: 1px solid #c4d3e9;
+  border: 1px solid #e5e7eb;
   background: #fff;
   color: #1f3550;
   text-decoration: none;
@@ -59,7 +59,7 @@
   background: rgba(255, 255, 255, 0.92);
   color: #334155;
   font-size: 12px;
-  border: 1px solid #d7e2ef;
+  border: 1px solid #e5e7eb;
 }
 
 .gm-style .gm-style-iw-c {

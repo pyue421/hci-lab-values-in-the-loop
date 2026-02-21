@@ -14,13 +14,39 @@
 }
 
 .calendar-topbar {
-  height: auto;
+  height: 50px;
   padding: 10px 18px 10px;
   border-bottom: 1px solid #e5e7eb;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
+}
+
+.calendar-top-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-back-button {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.calendar-back-chevron {
+  width: 12px;
+  height: 12px;
 }
 
 .calendar-week-nav {
@@ -31,17 +57,28 @@
 }
 
 .calendar-arrow {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   border: 1px solid #d7dbe0;
   background: #ffffff;
   color: #374151;
-  font-size: 16px;
-  font-weight: 300;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(17, 24, 39, 0.12);
+}
+
+.calendar-chevron-icon {
+  width: 13px;
+  height: 13px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 .calendar-arrow:hover {
@@ -66,10 +103,16 @@
 .calendar-title {
   margin: 0;
   justify-self: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
   color: #111827;
   letter-spacing: 0.01em;
+}
+
+.calendar-title-selected {
+  border: 1px solid #7588ff;
+  border-radius: 999px;
+  padding: 5px 16px;
 }
 
 .today-pill,
@@ -114,7 +157,18 @@
 .calendar-day-header-cell strong {
   color: #111827;
   font-size: 18px;
-  font-weight: 400;
+  font-weight: 300;
+}
+
+.calendar-day-header-cell.is-today strong {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1d4ed8;
+  color: #ffffff;
 }
 
 .calendar-scroll {
@@ -177,7 +231,7 @@
 .calendar-event-card strong {
   font-size: 14px;
   line-height: 1.1;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .calendar-event-card span {
@@ -185,20 +239,76 @@
 }
 
 .calendar-event-purple {
-  background: #F8EEFF;
+  background: rgba(248, 238, 255, 0.7);
   border-left-color: #C281EB;
   color: #6D03AF;
 }
 
 .calendar-event-blue {
-  background: #EBFAFF;
+  background: rgba(235, 250, 255, 0.7);
   border-left-color: #48CBF4;
   color: #00546E;
 }
 
+.calendar-availability-card {
+  position: absolute;
+  left: 0;
+  width: calc(100% - 4px);
+  border-radius: 0 14px 14px 0;
+  padding: 12px 10px 10px;
+  border-left: 6px solid #6584f5;
+  background: rgba(227, 234, 255, 0.7);
+  color: #1637b6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 3;
+}
+
+.calendar-availability-card strong {
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 500;
+  transition: opacity 0.16s ease;
+}
+
+.calendar-availability-card span {
+  font-size: 12px;
+  transition: opacity 0.16s ease;
+}
+
+.calendar-availability-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.calendar-availability-btn {
+  width: fit-content;
+  border: 1px solid #aec0ff;
+  border-radius: 10px;
+  padding: 4px 10px;
+  background: #ffffff;
+  color: #1e40d2;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.calendar-availability-btn-primary {
+  background: #ffffff;
+  border-color: #6e85ef;
+  color: #3A3A3A;
+}
+
 @media (max-width: 760px) {
   .home-calendar-card {
-    min-height: 470px;
+    min-height: 450px;
   }
 
   .calendar-topbar {
@@ -206,6 +316,10 @@
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 10px;
+  }
+
+  .calendar-top-left {
+    justify-content: center;
   }
 
   .calendar-week-nav,
@@ -225,9 +339,8 @@
   }
 
   .calendar-arrow {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 28px;
+    height: 28px;
   }
 
   .calendar-today {
@@ -262,6 +375,13 @@
   }
 
   .calendar-event-card {
+    padding: 6px 6px 6px 8px;
+    border-radius: 0 9px 9px 0;
+    border-left-width: 3px;
+    gap: 4px;
+  }
+
+  .calendar-availability-card {
     padding: 6px 6px 6px 8px;
     border-radius: 0 9px 9px 0;
     border-left-width: 3px;
