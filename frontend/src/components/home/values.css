@@ -44,6 +44,40 @@
   transform: scale(1.04);
 }
 
+.value-bubble-with-selection:not(.value-bubble-merged) {
+  background: #d1d5db;
+  border-color: #7f8287;
+  color: #30343a;
+}
+
+.value-bubble-merged {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+}
+
+.value-bubble-merged-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.value-bubble-merged-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  color: #3a3a3a;
+}
+
 .value-bubble span {
   font-size: 13px;
 }
@@ -60,8 +94,8 @@
 }
 
 .value-bubble-rose {
-  background: rgba(253, 176, 167, 0.35);
-  border-color: #EB807B;
+  background: #FFE1EE;
+  border-color: #FD81C9;
   color: #3A3A3A;
 }
 
@@ -81,6 +115,11 @@
   background: rgba(203, 167, 246, 0.36);
   border-color: #C281EB;
   color: #3A3A3A;
+}
+
+.value-bubble.value-bubble-merged {
+  background: transparent;
+  border: 0;
 }
 
 @media (max-width: 1180px) {

@@ -116,7 +116,7 @@
 
 .ai-summary-box {
   border-radius: 14px;
-  background: linear-gradient(90deg, #eee9f7 0%, #ffffff 100%);
+  background: linear-gradient(90deg, #eee9f7 0%, #f9fafb 100%);
   display: flex;
   align-items: flex-start;
   gap: 8px;

@@ -7,15 +7,16 @@ import { matches, valueWeights } from "../components/home/data"
 import "../components/home/home-layout.css"
 
 export default function Home() {
-  const [activeMatchId, setActiveMatchId] = useState(matches[0].id)
+  const [activeMatchId, setActiveMatchId] = useState(null)
   const [leftWidthPct, setLeftWidthPct] = useState(49)
   const [rightTopPct, setRightTopPct] = useState(62)
   const [dragType, setDragType] = useState(null)
   const shellRef = useRef(null)
   const rightColumnRef = useRef(null)
+  const matchesAreaRef = useRef(null)
 
-  const activeMatch = useMemo(
-    () => matches.find((match) => match.id === activeMatchId) ?? matches[0],
+  const selectedMatch = useMemo(
+    () => matches.find((match) => match.id === activeMatchId) ?? null,
     [activeMatchId]
   )
 
@@ -53,19 +54,33 @@ export default function Home() {
     }
   }, [dragType])
 
+  useEffect(() => {
+    function onDocumentPointerDown(event) {
+      if (!activeMatchId) return
+      if (!matchesAreaRef.current) return
+      if (matchesAreaRef.current.contains(event.target)) return
+      setActiveMatchId(null)
+    }
+
+    document.addEventListener("pointerdown", onDocumentPointerDown)
+    return () => {
+      document.removeEventListener("pointerdown", onDocumentPointerDown)
+    }
+  }, [activeMatchId])
+
   return (
     <div className="home-page">
       <div className="home-shell home-shell-split" ref={shellRef}>
         <section className="home-card home-left-card" style={{ width: `${leftWidthPct}%` }}>
           <div className="home-left-map">
-            <MapPanel activeMatch={activeMatch} embedded />
+            <MapPanel activeMatch={selectedMatch} embedded />
           </div>
           <div className="home-left-divider" />
-          <div className="home-left-matches">
+          <div className="home-left-matches" ref={matchesAreaRef}>
             <MatchCardsPanel
               matches={matches}
               activeMatchId={activeMatchId}
-              onSelectMatch={setActiveMatchId}
+              onSelectMatch={(nextId) => setActiveMatchId((currentId) => (currentId === nextId ? null : nextId))}
               embedded
             />
           </div>
@@ -91,7 +106,7 @@ export default function Home() {
           />
 
           <div className="home-right-bottom" style={{ height: `${100 - rightTopPct}%` }}>
-            <ValuesPanel valueWeights={valueWeights} />
+            <ValuesPanel valueWeights={valueWeights} activeMatch={selectedMatch} />
           </div>
         </div>
       </div>

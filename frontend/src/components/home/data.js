@@ -24,6 +24,11 @@ export const matches = [
       { label: "Video Games", emoji: "🎮", tone: "cool" },
       { label: "Cycling", emoji: "🚴", tone: "bright" },
     ],
+    valueMatchScores: {
+      Punctuality: 64,
+      Kindness: 52,
+      Trustworthiness: 46,
+    },
     values: ["Punctuality", "Kindness", "Trustworthiness"],
     coordinates: { lat: 43.474, lng: -80.538 },
   },
@@ -47,6 +52,11 @@ export const matches = [
       { label: "Pilates", emoji: "🧘", tone: "cool" },
       { label: "Design", emoji: "🎨", tone: "bright" },
     ],
+    valueMatchScores: {
+      Efficiency: 68,
+      Punctuality: 57,
+      Kindness: 44,
+    },
     values: ["Efficiency", "Punctuality", "Kindness"],
     coordinates: { lat: 43.4669, lng: -80.53 },
   },
