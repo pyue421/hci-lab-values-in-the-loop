@@ -1,33 +1,30 @@
-import React, { useEffect, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 const STORAGE_KEY = "vitl_onboarding_v1"
 
+function loadSavedAuth() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return {}
+    return JSON.parse(raw)
+  } catch {
+    return {}
+  }
+}
+
 export default function OnboardingAuth() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState("signup") // signup | login
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const savedAuth = useMemo(() => loadSavedAuth(), [])
+  const [mode, setMode] = useState(savedAuth?.authMode === "signup" ? "signup" : "login") // signup | login
+  const [email, setEmail] = useState(savedAuth?.email || "")
+  const [password, setPassword] = useState(savedAuth?.password || "")
   const [codeSent, setCodeSent] = useState(false)
   const [verificationCode, setVerificationCode] = useState("")
   const [expectedCode, setExpectedCode] = useState("")
-  const [verified, setVerified] = useState(false)
+  const [verified, setVerified] = useState(Boolean(savedAuth?.emailVerified))
   const [error, setError] = useState("")
   const [info, setInfo] = useState("")
-
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
-    try {
-      const saved = JSON.parse(raw)
-      setMode(saved?.authMode === "login" ? "login" : "signup")
-      setEmail(saved?.email || "")
-      setPassword(saved?.password || "")
-      setVerified(Boolean(saved?.emailVerified))
-    } catch {
-      // ignore bad local data
-    }
-  }, [])
 
   function persistAuth(partial = {}) {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -55,24 +52,44 @@ export default function OnboardingAuth() {
     return value.trim().includes("@") && value.trim().length >= 5
   }
 
-  function canContinue() {
-    const credentialsOk = isEmailValid(email) && password.trim().length >= 6
-    if (!credentialsOk) return false
-    return mode === "login" ? true : verified
+  function credentialsValid() {
+    return isEmailValid(email) && password.trim().length >= 6
   }
 
-  function sendCode() {
-    setError("")
-    setInfo("")
-    if (!isEmailValid(email)) {
-      setError("Please enter a valid email.")
+  function startSignup() {
+    if (mode === "signup") return
+    if (!credentialsValid()) {
+      setError("Please enter a valid email and password (6+ chars).")
       return
     }
+    setMode("signup")
     const generated = String(Math.floor(100000 + Math.random() * 900000))
     setExpectedCode(generated)
     setCodeSent(true)
+    setVerificationCode("")
     setVerified(false)
     setInfo(`Verification code sent. Demo code: ${generated}`)
+    setError("")
+  }
+
+  function backToLogin() {
+    setMode("login")
+    setCodeSent(false)
+    setVerificationCode("")
+    setExpectedCode("")
+    setVerified(false)
+    setInfo("")
+    setError("")
+  }
+
+  function resendCode() {
+    const generated = String(Math.floor(100000 + Math.random() * 900000))
+    setExpectedCode(generated)
+    setCodeSent(true)
+    setVerificationCode("")
+    setVerified(false)
+    setInfo(`Verification code sent. Demo code: ${generated}`)
+    setError("")
   }
 
   function verifyCode() {
@@ -86,12 +103,28 @@ export default function OnboardingAuth() {
     setInfo("Email verified.")
   }
 
-  function continueToOnboarding() {
-    if (!canContinue()) {
-      setError(mode === "signup" ? "Please complete email verification first." : "Please complete login details.")
+  function loginToOnboarding() {
+    setError("")
+    setInfo("")
+    if (!credentialsValid()) {
+      setError("Please enter a valid email and password (6+ chars).")
       return
     }
-    persistAuth({ emailVerified: mode === "signup" ? verified : true })
+    persistAuth({ authMode: "login", emailVerified: true })
+    navigate("/onboarding/mandatory")
+  }
+
+  function continueSignupToOnboarding() {
+    setError("")
+    if (!credentialsValid()) {
+      setError("Please enter a valid email and password (6+ chars).")
+      return
+    }
+    if (!verified) {
+      setError("Please complete email verification first.")
+      return
+    }
+    persistAuth({ authMode: "signup", emailVerified: true })
     navigate("/onboarding/mandatory")
   }
 
@@ -99,52 +132,55 @@ export default function OnboardingAuth() {
     <div className="onb-page">
       <div className="onb-card auth-card-shell">
         <div className="onb-header auth-header">
-          <div className="onb-title">Sign up / Log in</div>
-          <div className="onb-subtitle">Continue to onboarding</div>
+          <div className="onb-title">Welcome Abroad</div>
+          <div className="onb-subtitle">Log in into an existing account, or enter email and password to sign up</div>
         </div>
 
-        <div className="onb-body">
-          <div className="onb-section">
-            <div className="auth-mode-row">
-              <button type="button" className={`btn ${mode === "login" ? "btn-primary" : "btn-ghost"}`} onClick={() => { setMode("login"); setCodeSent(false); setVerified(false); setError(""); setInfo("") }}>
-                Login
-              </button>
-              <button type="button" className={`btn ${mode === "signup" ? "btn-primary" : "btn-ghost"}`} onClick={() => { setMode("signup"); setError(""); setInfo("") }}>
-                Sign up
-              </button>
-            </div>
+        <div className="auth-content-wrap">
+          <div className="onb-body">
+            <div className="onb-section">
+              <Field label="Email Address" value={email} onChange={setEmail} placeholder="you@example.com" />
+              <Field label="Password" value={password} onChange={setPassword} placeholder="Minimum 6 characters" type="password" />
 
-            <Field label="Email Address" value={email} onChange={setEmail} placeholder="you@example.com" />
-            <Field label="Password" value={password} onChange={setPassword} placeholder="Minimum 6 characters" type="password" />
-
-            {mode === "signup" && (
-              <div className="auth-verify-block">
-                <div className="auth-verify-actions">
-                  <button type="button" className="btn btn-ghost" onClick={sendCode}>
-                    {codeSent ? "Resend Code" : "Send Code"}
-                  </button>
-                </div>
-                {codeSent && (
-                  <div className="auth-code-row">
-                    <Field label="Verification Code" value={verificationCode} onChange={setVerificationCode} placeholder="6-digit code" />
-                    <button type="button" className="btn btn-primary" onClick={verifyCode}>
-                      Verify
+              {mode === "signup" && (
+                <div className="auth-verify-block">
+                  <div className="auth-verify-actions">
+                    <button type="button" className="btn btn-ghost" onClick={resendCode}>
+                      Resend Code
                     </button>
                   </div>
-                )}
+                  {codeSent && (
+                    <div className="auth-code-row">
+                      <Field label="Verification Code" value={verificationCode} onChange={setVerificationCode} placeholder="6-digit code" />
+                      <button type="button" className="btn btn-primary" onClick={verified ? continueSignupToOnboarding : verifyCode}>
+                        {verified ? "Continue" : "Verify"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {info ? <div className="auth-info">{info}</div> : null}
+              {error ? <div className="field-error">{error}</div> : null}
+            </div>
+          </div>
+
+          <div className="onb-footer auth-footer">
+            {mode === "signup" ? (
+              <button type="button" className="btn btn-ghost" onClick={backToLogin}>
+                Back to log in
+              </button>
+            ) : (
+              <div className="auth-actions">
+                <button type="button" className="btn btn-primary" onClick={loginToOnboarding}>
+                  Log in
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={startSignup}>
+                  Sign up
+                </button>
               </div>
             )}
-
-            {info ? <div className="auth-info">{info}</div> : null}
-            {error ? <div className="field-error">{error}</div> : null}
           </div>
-        </div>
-
-        <div className="onb-footer">
-          <div />
-          <button type="button" className="btn btn-primary" onClick={continueToOnboarding} disabled={!canContinue()}>
-            Continue
-          </button>
         </div>
       </div>
     </div>
