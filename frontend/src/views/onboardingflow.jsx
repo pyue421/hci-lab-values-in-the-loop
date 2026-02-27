@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
+import "./onboarding-shared.css"
+import "./onboarding-mandatory.css"
 
 const STORAGE_KEY = "vitl_onboarding_v1"
 const DOB_FORMAT = /^\d{4}\/\d{2}\/\d{2}$/

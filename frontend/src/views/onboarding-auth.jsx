@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import "./onboarding-shared.css"
+import "./onboarding-auth.css"
 
 const STORAGE_KEY = "vitl_onboarding_v1"
 
