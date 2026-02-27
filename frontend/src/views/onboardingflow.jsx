@@ -1,13 +1,24 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 
 const STORAGE_KEY = "vitl_onboarding_v1"
+const DOB_FORMAT = /^\d{4}\/\d{2}\/\d{2}$/
+const LOCATION_SUGGESTIONS = [
+  "Waterloo, ON",
+  "University of Waterloo",
+  "Wilfrid Laurier University",
+  "Conestoga College - Waterloo Campus",
+  "Kitchener GO Station",
+  "Waterloo Park",
+  "Pearson International Airport",
+  "Region of Waterloo International Airport",
+  "Toronto, ON",
+  "Mississauga, ON",
+]
 
 const defaultState = {
   step: 0,
-  authMode: "signup", // "signup" | "login"
-  email: "",
-  password: "",
   homeAddress: "",
   destinationAddress: "",
   dob: "",
@@ -27,7 +38,8 @@ export default function OnboardingFlow() {
     if (!raw) return
     try {
       const saved = JSON.parse(raw)
-      setState((s) => ({ ...s, ...saved }))
+      const nextStep = Number.isFinite(saved?.step) ? Math.max(0, Math.min(2, saved.step)) : 0
+      setState((s) => ({ ...s, ...saved, step: nextStep }))
     } catch {
       // ignore
     }
@@ -35,7 +47,6 @@ export default function OnboardingFlow() {
 
   const steps = useMemo(
     () => [
-      { key: "welcome", title: "Welcome Abroad", subtitle: "Sign up or login into your account" },
       { key: "journey", title: "Journey Setup", subtitle: "Tell us about your route" },
       { key: "about", title: "About You", subtitle: "Basic Personal Information" },
       {
@@ -65,16 +76,12 @@ export default function OnboardingFlow() {
 
   function isValidForStep(step) {
     if (step === 0) {
-      // basic email+password requirement for moving forward
-      return state.email.trim().length > 3 && state.password.trim().length >= 6
-    }
-    if (step === 1) {
       return state.homeAddress.trim().length > 3 && state.destinationAddress.trim().length > 3
     }
-    if (step === 2) {
-      return state.dob.trim().length > 0 && state.aviationTerm.trim().length > 1 && state.aviationLicense.trim().length > 1
+    if (step === 1) {
+      return DOB_FORMAT.test(state.dob.trim()) && state.aviationTerm.trim().length > 1 && state.aviationLicense.trim().length > 1
     }
-    if (step === 3) {
+    if (step === 2) {
       return state.canGiveRides === true || state.canGiveRides === false
     }
     return true
@@ -85,12 +92,10 @@ export default function OnboardingFlow() {
     if (!ok) {
       // mark relevant fields as touched so errors show
       if (state.step === 0) {
-        markTouched("email"); markTouched("password")
-      } else if (state.step === 1) {
         markTouched("homeAddress"); markTouched("destinationAddress")
-      } else if (state.step === 2) {
+      } else if (state.step === 1) {
         markTouched("dob"); markTouched("aviationTerm"); markTouched("aviationLicense")
-      } else if (state.step === 3) {
+      } else if (state.step === 2) {
         markTouched("canGiveRides")
       }
       return
@@ -108,24 +113,13 @@ export default function OnboardingFlow() {
   }
 
   function back() {
+    if (state.step === 0) {
+      navigate("/onboarding/auth")
+      return
+    }
     const prev = Math.max(0, state.step - 1)
     setState((s) => ({ ...s, step: prev }))
     saveProgress({ step: prev })
-  }
-
-  function skipSave() {
-    saveProgress()
-    // behavior from your mock: it doesn't necessarily advance by itself,
-    // but you can choose to advance. Here we keep it simple: advance.
-    const nextStep = Math.min(stepCount - 1, state.step + 1)
-    setState((s) => ({ ...s, step: nextStep }))
-    saveProgress({ step: nextStep })
-  }
-
-  function resetAll() {
-    localStorage.removeItem(STORAGE_KEY)
-    setState(defaultState)
-    setTouched({})
   }
 
   const current = steps[state.step]
@@ -134,7 +128,12 @@ export default function OnboardingFlow() {
     <div className="onb-page">
       <div className="onb-card">
         <div className="onb-progress">
-          <div className="onb-progress-bar" style={{ width: `${progressPct}%` }} />
+          <motion.div
+            className="onb-progress-bar"
+            initial={false}
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          />
         </div>
 
         {/* Header */}
@@ -146,15 +145,6 @@ export default function OnboardingFlow() {
         {/* Body */}
         <div className="onb-body">
           {state.step === 0 && (
-            <WelcomeScreen
-              state={state}
-              setField={setField}
-              touched={touched}
-              markTouched={markTouched}
-            />
-          )}
-
-          {state.step === 1 && (
             <JourneySetupScreen
               state={state}
               setField={setField}
@@ -163,7 +153,7 @@ export default function OnboardingFlow() {
             />
           )}
 
-          {state.step === 2 && (
+          {state.step === 1 && (
             <AboutYouScreen
               state={state}
               setField={setField}
@@ -172,7 +162,7 @@ export default function OnboardingFlow() {
             />
           )}
 
-          {state.step === 3 && (
+          {state.step === 2 && (
             <CarAccessScreen
               state={state}
               setField={setField}
@@ -184,51 +174,15 @@ export default function OnboardingFlow() {
 
         {/* Footer buttons */}
         <div className="onb-footer">
-          <button className="btn btn-ghost" onClick={back} disabled={state.step === 0}>
+          <button className="btn btn-ghost" onClick={back}>
             Back
           </button>
 
           <div className="onb-footer-right">
-            {state.step !== 0 && (
-              <button className="btn btn-ghost" onClick={skipSave}>
-                Skip (Save Progress)
-              </button>
-            )}
-
-            {/* Screen 1 uses Login/Sign up buttons; others use Next */}
-            {state.step === 0 ? (
-              <div className="auth-actions">
-                <button
-                  className={"btn btn-ghost"}
-                  onClick={() => {
-                    setField("authMode", "login")
-                    saveProgress({ authMode: "login" })
-                    next()
-                  }}
-                >
-                  Login
-                </button>
-                <button
-                  className={"btn btn-primary"}
-                  onClick={() => {
-                    setField("authMode", "signup")
-                    saveProgress({ authMode: "signup" })
-                    next()
-                  }}
-                >
-                  Sign up
-                </button>
-              </div>
-            ) : (
-              <button className="btn btn-primary" onClick={next}>
-                Next
-              </button>
-            )}
+            <button className="btn btn-primary" onClick={next}>
+              {state.step === stepCount - 1 ? "Next section" : "Next"}
+            </button>
           </div>
-        </div>
-
-        <div className="onb-reset">
-          <button className="link" onClick={resetAll}>Reset onboarding</button>
         </div>
       </div>
     </div>
@@ -237,7 +191,7 @@ export default function OnboardingFlow() {
 
 /* -------------------- Step Screens -------------------- */
 
-function Field({ icon, label, value, onChange, onBlur, placeholder, error }) {
+function Field({ icon, label, value, onChange, onBlur, placeholder, error, listId }) {
   return (
     <div className="field">
       <div className="field-label">
@@ -250,38 +204,9 @@ function Field({ icon, label, value, onChange, onBlur, placeholder, error }) {
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         placeholder={placeholder}
+        list={listId}
       />
       {error ? <div className="field-error">{error}</div> : null}
-    </div>
-  )
-}
-
-function WelcomeScreen({ state, setField, touched, markTouched }) {
-  const emailErr =
-    touched.email && state.email.trim().length <= 3 ? "Please enter a valid email." : ""
-  const passErr =
-    touched.password && state.password.trim().length < 6 ? "Password must be at least 6 characters." : ""
-
-  return (
-    <div className="onb-section">
-      <Field
-        icon="✉️"
-        label="Email Address"
-        value={state.email}
-        onChange={(v) => setField("email", v)}
-        onBlur={() => markTouched("email")}
-        placeholder=""
-        error={emailErr}
-      />
-      <Field
-        icon="🔒"
-        label="Password"
-        value={state.password}
-        onChange={(v) => setField("password", v)}
-        onBlur={() => markTouched("password")}
-        placeholder=""
-        error={passErr}
-      />
     </div>
   )
 }
@@ -295,29 +220,89 @@ function JourneySetupScreen({ state, setField, touched, markTouched }) {
   return (
     <div className="onb-section">
       <Field
-        icon="📍"
+        icon={<MapPinIcon />}
         label="Home Address"
         value={state.homeAddress}
         onChange={(v) => setField("homeAddress", v)}
         onBlur={() => markTouched("homeAddress")}
         placeholder=""
         error={homeErr}
+        listId="onb-location-suggestions"
       />
       <Field
-        icon="📍"
+        icon={<MapPinIcon />}
         label="Destination Address"
         value={state.destinationAddress}
         onChange={(v) => setField("destinationAddress", v)}
         onBlur={() => markTouched("destinationAddress")}
         placeholder=""
         error={destErr}
+        listId="onb-location-suggestions"
       />
+      <datalist id="onb-location-suggestions">
+        {LOCATION_SUGGESTIONS.map((location) => (
+          <option key={location} value={location} />
+        ))}
+      </datalist>
     </div>
   )
 }
 
+function MapPinIcon() {
+  return (
+    <svg viewBox="0 0 32 32" className="field-icon-svg" aria-hidden>
+      <path
+        d="M12 14a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M23.543 21.543l-5.657 5.657a2.667 2.667 0 0 1 -3.771 0l-5.658 -5.657a10.667 10.667 0 1 1 15.086 0z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="field-icon-svg" aria-hidden>
+      <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v11a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 3v4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 3v4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 11h16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function PlaneDepartureIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="field-icon-svg" aria-hidden>
+      <path d="M2.5 19h19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M3 14l7.5 2l2 5l2.5 -3l3.5 1.2a1.2 1.2 0 0 0 1.4 -1.7l-1.5 -3.2l3.1 -2.5a1.2 1.2 0 0 0 -1 -2.1l-3.7 .5l-3.2 -4.1a1.2 1.2 0 0 0 -2.1 .9l.1 4.1l-6.4 2.7a1.2 1.2 0 0 0 .3 2.2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function SchoolIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="field-icon-svg" aria-hidden>
+      <path d="M3 10l9 -4l9 4l-9 4z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 12v4a5 3 0 0 0 10 0v-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 10v4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function AboutYouScreen({ state, setField, touched, markTouched }) {
-  const dobErr = touched.dob && !state.dob ? "Please enter your date of birth." : ""
+  const dobErr = touched.dob && !DOB_FORMAT.test(state.dob.trim()) ? "Use format YYYY/MM/DD." : ""
   const termErr =
     touched.aviationTerm && state.aviationTerm.trim().length <= 1 ? "Enter your current aviation term." : ""
   const licErr =
@@ -325,35 +310,76 @@ function AboutYouScreen({ state, setField, touched, markTouched }) {
 
   return (
     <div className="onb-section">
-      <Field
-        icon="🎂"
-        label="Date of Birth"
-        value={state.dob}
-        onChange={(v) => setField("dob", v)}
-        onBlur={() => markTouched("dob")}
-        placeholder="YYYY-MM-DD"
-        error={dobErr}
-      />
-      <Field
-        icon="🛩️"
-        label="Current Aviation Term"
-        value={state.aviationTerm}
-        onChange={(v) => setField("aviationTerm", v)}
-        onBlur={() => markTouched("aviationTerm")}
-        placeholder=""
-        error={termErr}
-      />
-      <Field
-        icon="📄"
-        label="Aviation License"
-        value={state.aviationLicense}
-        onChange={(v) => setField("aviationLicense", v)}
-        onBlur={() => markTouched("aviationLicense")}
-        placeholder=""
-        error={licErr}
-      />
+      <div className="field">
+        <div className="field-label">
+          <span className="field-icon" aria-hidden><CalendarIcon /></span>
+          <span>Date of Birth</span>
+        </div>
+        <input
+          className={"input" + (dobErr ? " input-error" : "")}
+          type="text"
+          value={formatDobInput(state.dob)}
+          onChange={(e) => setField("dob", formatDobInput(e.target.value))}
+          onBlur={() => markTouched("dob")}
+          placeholder="____/__/__"
+          inputMode="numeric"
+          maxLength={10}
+        />
+        {dobErr ? <div className="field-error">{dobErr}</div> : null}
+      </div>
+
+      <div className="field">
+        <div className="field-label">
+          <span className="field-icon" aria-hidden><PlaneDepartureIcon /></span>
+          <span>Current Aviation Term</span>
+        </div>
+        <select
+          className={"input input-select" + (termErr ? " input-error" : "")}
+          value={state.aviationTerm}
+          onChange={(e) => setField("aviationTerm", e.target.value)}
+          onBlur={() => markTouched("aviationTerm")}
+        >
+          <option value="">Select term</option>
+          <option value="2A">2A</option>
+          <option value="2B">2B</option>
+          <option value="3A">3A</option>
+          <option value="3B">3B</option>
+        </select>
+        {termErr ? <div className="field-error">{termErr}</div> : null}
+      </div>
+
+      <div className="field">
+        <div className="field-label">
+          <span className="field-icon" aria-hidden><SchoolIcon /></span>
+          <span>Aviation License</span>
+        </div>
+        <select
+          className={"input input-select" + (licErr ? " input-error" : "")}
+          value={state.aviationLicense}
+          onChange={(e) => setField("aviationLicense", e.target.value)}
+          onBlur={() => markTouched("aviationLicense")}
+        >
+          <option value="">Select license</option>
+          <option value="None">None</option>
+          <option value="Student Pilot Permit">Student Pilot Permit</option>
+          <option value="PPL">PPL</option>
+          <option value="CPL">CPL</option>
+          <option value="ATPL">ATPL</option>
+        </select>
+        {licErr ? <div className="field-error">{licErr}</div> : null}
+      </div>
     </div>
   )
+}
+
+function formatDobInput(value) {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 8)
+  const y = digits.slice(0, 4)
+  const m = digits.slice(4, 6)
+  const d = digits.slice(6, 8)
+  if (digits.length <= 4) return y
+  if (digits.length <= 6) return `${y}/${m}`
+  return `${y}/${m}/${d}`
 }
 
 function CarAccessScreen({ state, setField, touched, markTouched }) {

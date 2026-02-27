@@ -206,14 +206,14 @@ def generate_with_openrouter(count, context, mode="batch", exclude_prompts=None)
 
     model = os.getenv("OPENROUTER_MODEL", "google/gemini-2.0-flash-001").strip()
     app_name = os.getenv("OPENROUTER_APP_NAME", "values-in-the-loop")
-    referer = os.getenv("OPENROUTER_SITE_URL", "http://localhost:5173")
+    referer = os.getenv("OPENROUTER_SITE_URL", "http://localhost:5176")
 
     system_prompt = (
         "Goal: Generate A/B questions to elicit user values for matching users for carpooling. "
         "Focus on higher-level value dimensions such as punctuality, efficiency, trustworthiness, kindness, "
         "safety, communication, flexibility, comfort, environmental impact, reliability, and fairness. "
         "Questions must reveal meaningful tradeoffs between values, not surface-level wording changes. "
-        "Do not ask about processes like payment methods, fares, pricing, or discounts. "
+        "Do not ask about app features/UI, payment methods, fares, pricing, discounts, or communication tools/channels. "
         "Vocabulary should be simple and accessible, avoiding jargon or abstract concepts. "
         "Return strict JSON only with this exact shape: "
         "{\"questions\":[{\"prompt\":\"...\",\"a\":\"...\",\"b\":\"...\"}]}. "
@@ -225,7 +225,7 @@ def generate_with_openrouter(count, context, mode="batch", exclude_prompts=None)
         user_prompt = (
             "Generate 1 unique A/B question tailored to carpooling values. "
             "Target one meaningful value tradeoff (e.g., punctuality vs flexibility, efficiency vs comfort). "
-            "Do not mention app features, payment, fares, or pricing. "
+            "Do not mention app features/UI, payment, fares, pricing, or communication channels/tools (chat/phone call). "
             "Keep it concise and scenario-based. Options must be <= 140 chars. "
             f"Avoid these prompts: {banned}. "
             f"User context: {json.dumps(context or {}, ensure_ascii=True)}"
@@ -235,7 +235,7 @@ def generate_with_openrouter(count, context, mode="batch", exclude_prompts=None)
             f"Generate {count} unique A/B questions tailored to carpooling. "
             "Each question should map to one primary value tradeoff (e.g., punctuality vs flexibility, "
             "efficiency vs comfort, consistency vs flexibility, sustainability vs speed). "
-            "Do not ask about app features, payment methods, fares, or pricing. "
+            "Do not ask about app features/UI, payment methods, fares, pricing, or communication channels/tools. "
             "Each prompt should be concise and scenario-based. "
             "Each option should be clear, balanced, and <= 160 chars. "
             "Avoid repeating the same value pairing across multiple questions. "

@@ -1,15 +1,10 @@
 .home-page {
-  --home-bg-1: #f2f8ff;
-  --home-bg-2: #fdf6ef;
   --home-card: rgba(255, 255, 255, 0.86);
   --home-border: #e5e7eb;
   --home-text-soft: #607083;
   min-height: 100vh;
   padding: 24px;
-  background:
-    radial-gradient(circle at 12% 20%, #dff6ff 0%, transparent 34%),
-    radial-gradient(circle at 90% 82%, #ffeacf 0%, transparent 35%),
-    linear-gradient(120deg, var(--home-bg-1), var(--home-bg-2));
+  background: var(--bg, #f6f7fb);
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 

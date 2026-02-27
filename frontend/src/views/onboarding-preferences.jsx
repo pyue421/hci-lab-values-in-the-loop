@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import { loadOnboardingQuestions, regenerateCurrentOnboardingQuestion } from "../services/onboarding-questions"
 
 const SET_SIZE = 10
@@ -131,7 +132,12 @@ export default function OnboardingPreferences() {
     <div className="onb-page">
       <div className="onb-card pref-card-shell">
         <div className="onb-progress pref-progress">
-          <div className="onb-progress-bar" style={{ width: `${progressPct}%` }} />
+          <motion.div
+            className="onb-progress-bar"
+            initial={false}
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.28, ease: "easeInOut" }}
+          />
         </div>
 
         <div className={`pref-title${regenerating ? " pref-title-regenerating" : ""}`}>
